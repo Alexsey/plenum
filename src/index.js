@@ -1,35 +1,28 @@
 'use strict'
 
-const {
-  cloneDeep, forEach, isArray, zipObject
-} = require('lodash')
+const util = require('util')
 
-const values = Symbol('privateState')
-const defaultValue = Symbol('defaultValue')
+const {isArray, isString, isNumber} = require('lodash')
 
-module.exports = function plenumFactory (dict, proto) {
-  const dictObj = isArray(dict) ? zipObject(dict, dict) : cloneDeep(dict)
+const format = (...args) => isString(args[0]) ? `'${util.format(...args)}'` : util.format(...args)
 
-  forEach(dictObj, (val, key) => {
-    dictObj[key] = String(val)
+class PlenumSet extends Array {}
+class PlenumInstance extends String {}
+
+module.exports = function plenum (dict, proto) {
+  if (!isArray(dict))
+    throw Error(
+      `The first argument of plenum function must be an array but provided ${format(dict)}`
+    )
+
+  dict.forEach(item => {
+    if (!isString(item) && !isNumber(item))
+      throw Error('All items of the first array argument of plenum function must be strings, ' +
+        `Strings or numbers but provided ${format(item)}`)
   })
 
-  return create(dictObj, proto)
-}
+  const pSet = new PlenumSet(...dict.map(v => new PlenumInstance(v)))
+  pSet.forEach(v => pSet[v] = v)
 
-
-function create (dict, proto = {}) {
-  let lock = false
-  const Plenum = function (val) {
-    if (lock) throw Error('Plenum functions should not be called')
-    this[values] = {[defaultValue]: val}
-  }
-  Plenum.prototype = Object.create(PlenumBase.prototype, proto)
-  forEach(dict, (val, key) => Plenum[key] = new Plenum(val))
-  lock = true
-  return Plenum
-}
-
-class PlenumBase {
-
+  return pSet
 }

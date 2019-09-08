@@ -10,7 +10,11 @@ describe('Plenum function ->', () => {
   describe('First argument is an array ->', () => {
     it('Should throw if first argument is not an array', () => {
       expect(() => plenum('bla'))
-        .toThrow('First argument to plenum must be an array but provided "bla"')
+        .toThrow("The first argument of plenum function must be an array but provided 'bla'")
+    })
+    it('Should throw if item of first array argument is not a string, String or number', () => {
+      expect(() => plenum([{}])).toThrow('All items of the first array argument of plenum ' +
+        'function must be strings, Strings or numbers but provided {}')
     })
     it('Should not throw if first argument is an array of strings', () => {
       expect(() => plenum(['bla'])).not.toThrow()
@@ -59,6 +63,15 @@ describe('Plenum set ->', () => {
     const times = plenum(['winter', 'spring', 'summer', 'autumn'])
 
     expect(times).toBeInstanceOf(Array)
+  })
+
+  it('Should have all elements as keys', () => {
+    const times = plenum(['winter', 'spring', 'summer', 'autumn'])
+
+    expect(times).toHaveProperty('winter', times[0])
+    expect(times).toHaveProperty('spring', times[1])
+    expect(times).toHaveProperty('summer', times[2])
+    expect(times).toHaveProperty('autumn', times[3])
   })
 
   // todo think over
